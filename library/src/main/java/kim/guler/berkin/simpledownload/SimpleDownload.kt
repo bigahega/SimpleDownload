@@ -14,7 +14,7 @@ import java.io.File
 /**
  * Created by Berkin Güler on 11.01.2020.
  */
-object SimpleDownloader {
+object SimpleDownload {
 
     private const val BUFFER_SIZE = 8 * 1024L
 
