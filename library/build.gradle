@@ -1,6 +1,9 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+
+group = 'com.github.bigahega'
 
 android {
     compileSdkVersion 29
@@ -24,7 +27,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -43,6 +46,3 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
-
-apply from: 'https://raw.githubusercontent.com/sky-uk/gradle-maven-plugin/master/gradle-mavenizer.gradle'
-group = 'com.github.bigahega'
