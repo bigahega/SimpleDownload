@@ -58,7 +58,7 @@ object SimpleDownloader {
                     if (!isActive) {
                         return@launch
                     }
-                    File(targetFilePath).mkdirs()
+                    File(targetFilePath).parentFile?.mkdirs()
                     val body = execute.body ?: return@launch
                     val bufferedSource = body.source()
                     val bufferedSink = File(targetFilePath).sink().buffer()
