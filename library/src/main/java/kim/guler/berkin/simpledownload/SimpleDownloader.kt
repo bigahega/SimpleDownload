@@ -1,5 +1,7 @@
 package kim.guler.berkin.simpledownload
 
+import android.os.Handler
+import android.os.Looper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -17,6 +19,7 @@ import java.io.File
 object SimpleDownloader {
 
     private const val BUFFER_SIZE = 8 * 1024L
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
     suspend fun String.download(
         targetFilePath: String,
@@ -68,7 +71,9 @@ object SimpleDownloader {
                         } while (read > 0 && isActive)
                     }
                 } catch (ex: Exception) {
-                    completionListener.invoke(false, ex)
+                    mainHandler.post {
+                        completionListener.invoke(false, ex)
+                    }
                 }
             }
         }
