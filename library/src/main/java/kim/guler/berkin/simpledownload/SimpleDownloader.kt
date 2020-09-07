@@ -3,10 +3,8 @@ package kim.guler.berkin.simpledownload
 import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
@@ -34,7 +32,7 @@ object SimpleDownloader {
         targetFilePath: String,
         completionListener: (success: Boolean, exception: Exception?) -> Unit,
         progressCallback: ((progress: Int) -> Unit)? = null
-    ): Job {
+    ) {
         val request = Request.Builder().url(url).build()
 
         val client = with(OkHttpClient.Builder()) {
@@ -51,29 +49,27 @@ object SimpleDownloader {
             }
         }.build()
 
-        return coroutineScope {
-            launch(Dispatchers.IO) {
-                try {
-                    val execute = client.newCall(request).execute()
-                    if (!isActive) {
-                        return@launch
-                    }
-                    File(targetFilePath).parentFile?.mkdirs()
-                    val body = execute.body ?: return@launch
-                    val bufferedSource = body.source()
-                    val bufferedSink = File(targetFilePath).sink().buffer()
+        withContext(Dispatchers.IO) {
+            try {
+                val execute = client.newCall(request).execute()
+                if (!isActive) {
+                    return@withContext
+                }
+                File(targetFilePath).parentFile?.mkdirs()
+                val body = execute.body ?: return@withContext
+                val bufferedSource = body.source()
+                val bufferedSink = File(targetFilePath).sink().buffer()
 
-                    useResources(bufferedSource, bufferedSink) {
-                        var read: Long
-                        do {
-                            read = bufferedSource.read(bufferedSink.buffer, BUFFER_SIZE)
-                            bufferedSink.emit()
-                        } while (read > 0 && isActive)
-                    }
-                } catch (ex: Exception) {
-                    mainHandler.post {
-                        completionListener.invoke(false, ex)
-                    }
+                useResources(bufferedSource, bufferedSink) {
+                    var read: Long
+                    do {
+                        read = bufferedSource.read(bufferedSink.buffer, BUFFER_SIZE)
+                        bufferedSink.emit()
+                    } while (read > 0 && isActive)
+                }
+            } catch (ex: Exception) {
+                mainHandler.post {
+                    completionListener.invoke(false, ex)
                 }
             }
         }
